@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A POD?
+#   A Pod is the smallest deployable unit in Kubernetes.
+#   It wraps one or more containers that share the same network (IP address)
+#   and storage. Every container in a Pod can talk to each other via localhost.
+#
+# USE CASE:
+#   Run a single instance of color-app to explore how Pods work — get an IP,
+#   exec into the container, read logs, and delete it. The app has a built-in
+#   default color (red) so no env vars are needed at this stage.
+#
+# USEFUL COMMANDS:
+#   kubectl apply -f pod.yaml -n color-app
+#   kubectl get pods -n color-app -o wide
+#   kubectl describe pod color-app-pod -n color-app
+#   kubectl logs color-app-pod -n color-app
+#   kubectl exec -it color-app-pod -n color-app -- sh
+#   kubectl delete pod color-app-pod -n color-app
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: color-app-pod
+  namespace: color-app
+  labels:
+    app: color-app
+spec:
+  containers:
+  - name: color-app
+    image: chafah/color-app:latest
+    ports:
+    - containerPort: 8080

@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A NAMESPACE?
+#   A Namespace is a virtual cluster inside a Kubernetes cluster.
+#   It lets you divide cluster resources between multiple teams, projects
+#   or environments (dev, staging, prod) without needing separate clusters.
+#
+# USE CASE:
+#   You are running dev and prod workloads on the same cluster.
+#   By putting them in separate namespaces you can apply different
+#   resource quotas, network policies and RBAC rules to each one.
+#
+# USEFUL COMMANDS:
+#   kubectl apply -f namespace.yaml
+#   kubectl get namespaces
+#   kubectl describe namespace color-app
+#   kubectl delete namespace color-app
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wandaprep
+  labels:
+    env: production
+    team: wandaprep

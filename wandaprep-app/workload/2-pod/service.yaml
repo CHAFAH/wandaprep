@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: color-app-svc
+  namespace: color-app
+spec:
+  selector:
+    env: prod
+  type: NodePort
+  ports:
+  - name: tcp
+    port:  80
+    targetPort: 8080
+    nodePort: 30080

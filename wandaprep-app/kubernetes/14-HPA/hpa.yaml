@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A HORIZONTALPODAUTOSCALER (HPA)?
+#   An HPA automatically scales the number of Pod replicas in a Deployment
+#   up or down based on observed CPU or memory utilisation (or custom metrics).
+#   It queries the Metrics Server every 15 seconds and adjusts replicas to
+#   keep utilisation at the target level.
+#
+# USE CASE:
+#   color-app gets heavy traffic during business hours and almost none at night.
+#   The HPA scales from 2 to 10 replicas as CPU climbs above 60%, then scales
+#   back down when traffic drops — saving cost without manual intervention.
+#
+# PREREQUISITES:
+#   metrics-server must be installed in the cluster:
+#   kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#
+# USEFUL COMMANDS:
+#   kubectl apply -f hpa.yaml -n color-app
+#   kubectl get hpa -n color-app
+#   kubectl describe hpa color-app-hpa -n color-app
+#   # Watch it scale in real time:
+#   kubectl get hpa color-app-hpa -n color-app -w
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: color-app-hpa
+  namespace: color-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: color-app-deployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60

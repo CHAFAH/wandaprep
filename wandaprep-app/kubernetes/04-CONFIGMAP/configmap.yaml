@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A CONFIGMAP?
+#   A ConfigMap stores non-sensitive configuration as key-value pairs.
+#   Pods consume it as environment variables or mounted files.
+#   Changing a ConfigMap does not require rebuilding the container image.
+#
+# USE CASE:
+#   color-app reads APP_COLOR, APP_ENV, and APP_MESSAGE at startup.
+#   Change APP_COLOR from "blue" to "green" and restart the Pod — the page
+#   background changes without touching the image. This shows how config
+#   is decoupled from code in Kubernetes.
+#
+# USEFUL COMMANDS:
+#   kubectl apply -f configmap.yaml -n wandaprep
+#   kubectl get configmap wandaprep-config -n wandaprep
+#   kubectl describe configmap wandaprep-config -n wandaprep
+#   kubectl edit configmap wandaprep-config -n wandaprep
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wandaprep-config
+  namespace: wandaprep
+data:
+  APP_COLOR: "blue"
+  APP_ENV: "dev"
+  APP_MESSAGE: "Hello from ConfigMap!"
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# Pod that consumes the ConfigMap above as environment variables.
+# Apply this file and visit the pod to see the blue background and message.
+#
+#   kubectl apply -f configmap.yaml -n color-app
+#   kubectl get pods -n color-app
+#   kubectl exec -it color-app-configmap-pod -n color-app -- env | grep APP
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wandaprep-configmap-pod
+  namespace: wandaprep
+  labels:
+    app: wandaprep-app
+spec:
+  containers:
+  - name: wandaprep-app
+    image: chafah/wandaprep-app:latest
+    ports:
+    - containerPort: 8080
+    envFrom:
+    - configMapRef:
+        name: wandaprep-config

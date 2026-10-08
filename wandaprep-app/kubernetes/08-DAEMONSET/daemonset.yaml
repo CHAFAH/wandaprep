@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A DAEMONSET?
+#   A DaemonSet ensures that exactly one Pod runs on every node in the cluster
+#   (or a subset of nodes using node selectors). When a new node joins the
+#   cluster, the DaemonSet automatically schedules a Pod on it.
+#
+# USE CASE:
+#   Node-level agents that must run everywhere — log collectors (Fluent Bit),
+#   monitoring agents (Datadog, Prometheus node-exporter), network plugins,
+#   and security scanners. Here we run color-app on every node to demonstrate
+#   that each node gets exactly one instance.
+#
+# USEFUL COMMANDS:
+#   kubectl apply -f daemonset.yaml -n color-app
+#   kubectl get daemonset -n color-app
+#   kubectl describe daemonset color-app-daemonset -n color-app
+#   kubectl get pods -n color-app -o wide   # notice one pod per node
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: color-app-daemonset
+  namespace: color-app
+  labels:
+    app: color-app-daemon
+spec:
+  selector:
+    matchLabels:
+      app: color-app-daemon
+  template:
+    metadata:
+      labels:
+        app: color-app-daemon
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: color-app
+        image: chafah/color-app:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
