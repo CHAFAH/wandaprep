@@ -1,0 +1,64 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A SIDECAR?
+#   A Sidecar is a second container running in the same Pod as the main app.
+#   Both containers share the same network (localhost) and can share volumes.
+#   The sidecar extends the main container without modifying its image.
+#
+# USE CASE:
+#   color-app writes logs to /var/log/color-app/app.log. A log-shipper sidecar
+#   tails that file and prints each line to its own stdout. This is the pattern
+#   used by Fluent Bit on EKS — the app just writes files, the sidecar ships them.
+#
+# APPLY AND TEST:
+#   kubectl apply -f sidecar.yaml -n color-app
+#   kubectl get pods color-app-sidecar -n color-app
+#
+#   # Watch the main app logs:
+#   kubectl logs color-app-sidecar -c color-app -n color-app
+#
+#   # Watch the sidecar picking up and printing those logs:
+#   kubectl logs color-app-sidecar -c log-shipper -n color-app -f
+#
+#   # Exec into the sidecar and check the shared volume:
+#   kubectl exec -it color-app-sidecar -c log-shipper -n color-app -- sh
+#   ls /logs/
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: color-app-sidecar
+  namespace: color-app
+  labels:
+    app: color-app
+spec:
+  containers:
+
+  # ── Main application container ─────────────────────────────────────────────
+  - name: color-app
+    image: chafah/color-app:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log/color-app
+
+  # ── Sidecar: tails the log file and ships each line to stdout ──────────────
+  - name: log-shipper
+    image: busybox:1.36
+    command:
+    - "sh"
+    - "-c"
+    - |
+      echo "[SHIPPER] Waiting for app.log..."
+      while [ ! -f /logs/app.log ]; do sleep 1; done
+      echo "[SHIPPER] Tailing app.log"
+      tail -f /logs/app.log | while read line; do
+        echo "[SHIPPER] $(date -u +%Y-%m-%dT%H:%M:%SZ) $line"
+      done
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /logs
+
+  volumes:
+  - name: shared-logs
+    emptyDir: {}

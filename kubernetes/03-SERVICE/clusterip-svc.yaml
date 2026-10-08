@@ -1,0 +1,68 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS A CLUSTERIP SERVICE?
+#   ClusterIP gives a stable internal IP and DNS name to a group of Pods.
+#   It is only reachable from inside the cluster — not from your browser.
+#   This is the default service type.
+#
+# USE CASE:
+#   Internal communication between services. An API pod calls color-app
+#   by name (http://color-app-clusterip-svc) without knowing any Pod IPs.
+#
+# HOW TO DEMO:
+#   1. Apply this file — creates the app pod AND the service
+#   2. Exec into the curl pod and hit the service by DNS name
+#   3. Show that you CANNOT reach it from outside the cluster
+#
+#   kubectl apply -f clusterip-svc.yaml -n color-app
+#
+#   # Exec into the curl pod and call the service by its DNS name:
+#   kubectl exec -it curl-pod -n color-app -- sh
+#   wget -qO- http://color-app-clusterip-svc    # should return the HTML page
+#   wget -qO- http://color-app-clusterip-svc/health
+#
+#   # Show the service has a ClusterIP but no external IP:
+#   kubectl get svc color-app-clusterip-svc -n color-app
+#
+# USEFUL COMMANDS:
+#   kubectl get svc -n color-app
+#   kubectl describe svc color-app-clusterip-svc -n color-app
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: color-app-clusterip-pod
+  namespace: color-app
+  labels:
+    app: color-app
+spec:
+  containers:
+  - name: color-app
+    image: chafah/color-app:latest
+    ports:
+    - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: color-app-clusterip-svc
+  namespace: color-app
+spec:
+  selector:
+    app: color-app
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+# curl pod — use this to call the ClusterIP service from inside the cluster
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-pod
+  namespace: color-app
+spec:
+  containers:
+  - name: curl
+    image: curlimages/curl:latest
+    command: ["sleep", "3600"]

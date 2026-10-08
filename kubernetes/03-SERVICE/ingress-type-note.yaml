@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT IS AN INGRESS SERVICE TYPE?
+#   "Ingress" is not a Service type — it is a separate Kubernetes resource.
+#   However it works alongside a ClusterIP Service: the Ingress routes external
+#   HTTP/HTTPS traffic to the ClusterIP Service, which then forwards it to Pods.
+#
+# SERVICE TYPES SUMMARY:
+#   ClusterIP    — internal only (default)
+#   NodePort     — node IP + static port, no cloud needed
+#   LoadBalancer — cloud load balancer per service (costs money per service)
+#   Headless     — no cluster IP, returns Pod IPs directly
+#   ExternalName — maps a service to an external DNS name
+#
+# WHY USE INGRESS INSTEAD OF LOADBALANCER?
+#   One ALB (Application Load Balancer) handles ALL services via path or host
+#   rules. LoadBalancer creates a separate cloud LB per Service — expensive.
+#   Ingress = one LB, many services, path-based routing, TLS in one place.
+#
+# HOW IT WORKS:
+#   Browser → ALB (Ingress) → ClusterIP Service → Pods
+#
+# PREREQUISITES:
+#   - An Ingress Controller must be running (AWS Load Balancer Controller,
+#     nginx-ingress, traefik, etc.)
+#   - The ClusterIP Service must exist and select the correct Pods
+#
+# USEFUL COMMANDS:
+#   kubectl get ingress -n color-app
+#   kubectl describe ingress color-app-ingress -n color-app
+#   # ADDRESS column shows the ALB DNS once provisioned (1-2 min on EKS)
+# ─────────────────────────────────────────────────────────────────────────────
+# See ../13-INGRESS/ingress.yaml for the full Ingress resource definition.

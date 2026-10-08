@@ -1,0 +1,19 @@
+# LoadBalancer Service for the Deployment
+# Apply this after deploy.yaml to expose wandaprep-app externally
+apiVersion: v1
+kind: Service
+metadata:
+  name: wandaprep-lb-svc
+  namespace: wandaprep
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  selector:
+    app: wandaprep-app
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080

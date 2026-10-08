@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: wandaprep-app-svc
+spec:
+  selector:
+    name: wandaprep-app
+  type: NodePort
+  ports:
+  - name:  tcp
+    port:  80
+    targetPort:  8080
+    nodePort: 31200
