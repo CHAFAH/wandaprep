@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: color-app-config
-  namespace: color-app
-data:
-  APP_COLOR: "green"
-  APP_ENV: "production"
-  APP_MESSAGE: "Welcome to the Color App!"
